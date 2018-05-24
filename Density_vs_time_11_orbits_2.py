@@ -69,7 +69,7 @@ def read_ngims(mylist):
     return alldata
 
 def date_range(startdate,enddate):
-    filelist = glob('C:/Users/devinrb/Documents/2016_2017 School Year/Thesis/NGIMSData/NGIMS_327_508/*cs*.csv') #grab all MAVEN data from downloaded files using glob
+    filelist = glob('data/*cs*.csv') #grab all MAVEN data from downloaded files using glob
     if len(filelist) < 1:
         print "No MAVEN files found!"
         print "Exiting!"
@@ -94,6 +94,7 @@ all_ngims = [item for sublist in all_ngims for item in sublist]
 
 ngims_df = pd.DataFrame.from_records(data = all_ngims, index = ('orbit'))
 
+#generate list to prompt user of possible choices
 print "Select Species"
 print "1. Argon (Ar)"
 print "2. Carbon Dioxide (CO2)"
@@ -102,7 +103,7 @@ print "4. Helium (He)"
 print "5. Carbon Monoxide (CO)"
 print "6. Oxygen (O)"
 
-#prompt user for desired molecule symbol
+#error check to make sure user selected a valid molecule
 while 1:
     choice = raw_input()
     mydf = ngims_df[ngims_df['species'] == '%s' %(choice)]
@@ -116,19 +117,29 @@ while 1:
 
 #plot the graph with chosen element
 
-
+#recast dates as 64 bit integers so they can be averaged
 mydf['date'] = np.int64(mydf['date'])
+#take repeated indices and condense them into one index, averaging the associated data
 mydf = mydf.groupby(mydf.index).mean()
+#make copies for pandas series to work with them
 df_den_copy = mydf['den'].copy()
 df_date_copy = mydf['date'].copy()
+#compute rolling averages for densities and dates
 rolling_avg_den = df_den_copy.rolling(window = 11, center = True).mean()
 rolling_avg_date = df_date_copy.rolling(window = 11, center = True).mean()
+#specify x-axis data (dates) and convert them back into Datetime format. Also drop rows containing empty value
 x_axis = rolling_avg_date.dropna()
 x_axis = pd.DatetimeIndex(x_axis)
+#specify y-axis data and remove rows containing an empty row
 y_axis = rolling_avg_den.dropna()
+#generate plot
 plt.plot(x_axis,y_axis, 'bo')
+#make dates look nicer
 plt.gcf().autofmt_xdate()
+#misc plot data
 plt.xlabel('Time',fontsize=14)
 plt.ylabel('Density ($Molecules/cm^3$)')
 plt.title('%i km'%(UserAlt))
+pdb.set_trace()
+#show plot
 plt.show()
