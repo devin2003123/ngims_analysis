@@ -212,10 +212,8 @@ if(UserChoice == 2):
     plt.plot(allcoordinates[4][0], allcoordinates[4][1], 'ro', label='210-220 km')
 
 
-    plt.legend()
-    plt.xlabel('Time',fontsize=14)
-    plt.ylabel('Density ($Molecules/cm^3$)')
+    plt.legend(loc='best',fontsize = 9)
+    plt.xlabel('Time',fontsize=18)
+    plt.ylabel('Density ($Molecules/cm^3$)',fontsize=18)
     plt.gcf().autofmt_xdate()
     plt.show()
-
-pdb.set_trace()
