@@ -26,7 +26,7 @@ while 1:
             break
     elif UserChoice == 2:
         uLimit = 220
-        lLimit = 170
+        lLimit = 160
         break
     else:
         print "Invalid selection.  Please enter 1 (single alt) or 2 (multiple alt)"
@@ -189,11 +189,13 @@ if(UserChoice == 2):
     #list of all Altitudes
     allaltitudes = []
 
-    altitude1 = mydf[(mydf['alt'] >= 170) & (mydf['alt'] < 180)]
-    altitude2 = mydf[(mydf['alt'] >= 180) & (mydf['alt'] < 190)]
-    altitude3 = mydf[(mydf['alt'] >= 190) & (mydf['alt'] < 200)]
-    altitude4 = mydf[(mydf['alt'] >= 200) & (mydf['alt'] < 210)]
-    altitude5 = mydf[(mydf['alt'] >= 210) & (mydf['alt'] < 220)]
+    lower = 160
+    dalt = 10
+    altitude1 = mydf[(mydf['alt'] >= lower) & (mydf['alt'] < lower+dalt)]
+    altitude2 = mydf[(mydf['alt'] >= lower+dalt) & (mydf['alt'] < lower+2*dalt)]
+    altitude3 = mydf[(mydf['alt'] >= lower+2*dalt) & (mydf['alt'] < lower+3*dalt)]
+    altitude4 = mydf[(mydf['alt'] >= lower+3*dalt) & (mydf['alt'] < lower+4*dalt)]
+    altitude5 = mydf[(mydf['alt'] >= lower+4*dalt) & (mydf['alt'] < lower+5*dalt)]
 
     allaltitudes.append(altitude1)
     allaltitudes.append(altitude2)
@@ -205,15 +207,18 @@ if(UserChoice == 2):
         allcoordinates.append(create_data_points(x))
 
 
-    plt.plot(allcoordinates[0][0], allcoordinates[0][1], 'ko', label='170-180 km')
-    plt.plot(allcoordinates[1][0], allcoordinates[1][1], 'go', label='180-190 km')
-    plt.plot(allcoordinates[2][0], allcoordinates[2][1], 'bo', label='190-200 km')
-    plt.plot(allcoordinates[3][0], allcoordinates[3][1], 'co', label='200-210 km')
-    plt.plot(allcoordinates[4][0], allcoordinates[4][1], 'ro', label='210-220 km')
+    plt.plot(allcoordinates[0][0], allcoordinates[0][1], 'ko', label='160-170 km')
+    plt.plot(allcoordinates[1][0], allcoordinates[1][1], 'go', label='170-180 km')
+    plt.plot(allcoordinates[2][0], allcoordinates[2][1], 'bo', label='180-190 km')
+    plt.plot(allcoordinates[3][0], allcoordinates[3][1], 'co', label='190-200 km')
+    plt.plot(allcoordinates[4][0], allcoordinates[4][1], 'ro', label='200-210 km')
 
 
     plt.legend(loc='best',fontsize = 9)
     plt.xlabel('Time',fontsize=18)
     plt.ylabel('Density ($Molecules/cm^3$)',fontsize=18)
     plt.gcf().autofmt_xdate()
+    PearCorr = altitude1['den'].corr(altitude2['den'])
+    print "The Pearson Correlation Coefficient between the 160-170 km and 170-180 km lines is: {}".format(PearCorr)
     plt.show()
+pdb.set_trace()
