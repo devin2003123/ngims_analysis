@@ -218,7 +218,7 @@ if(UserChoice == 2):
     plt.xlabel('Time',fontsize=18)
     plt.ylabel('Density ($Molecules/cm^3$)',fontsize=18)
     plt.gcf().autofmt_xdate()
-    PearCorr = altitude1['den'].corr(altitude2['den'])
+    PearCorr = allcoordinates[0][1].corr(allcoordinates[1][1])
     print "The Pearson Correlation Coefficient between the 160-170 km and 170-180 km lines is: {}".format(PearCorr)
     plt.show()
 pdb.set_trace()
