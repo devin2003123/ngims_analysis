@@ -153,6 +153,25 @@ def create_data_points(mydataframe):
     mycoords.append(y_values)
     return mycoords
 
+#function to determine a dataframe's rolling average and then reindex it by date
+def date_indexed_rollavg(mydataframe):
+    dateIndexDF = mydataframe.copy()
+    dateIndexDF['date'] = np.int64(dateIndexDF['date'])
+    dateIndexDF = dateIndexDF.groupby(dateIndexDF.index).mean()
+    dateIndexDF = dateIndexDF.rolling(window=11, center = True).mean()
+    dateIndexDF = dateIndexDF.dropna()
+    dateIndexDF = dateIndexDF.set_index('date')
+    dateIndexDF.index = pd.DatetimeIndex(dateIndexDF.index)
+
+    #extract the density series from the DataFrame
+    dateIndexDS = dateIndexDF['den'].resample('1d').mean()
+    return dateIndexDS
+
+#function to determine the correlation between two density dataseries
+def density_pCorrCoef(dataSeriesOne, dataSeriesTwo):
+    correlation = pd.rolling_corr(dataSeriesOne, dataSeriesTwo, window = 4, center = True)
+    return correlation.dropna()
+
 ##Logic Branch for Single Altitude
 
 if(UserChoice == 1):
@@ -206,12 +225,12 @@ if(UserChoice == 2):
     for x in allaltitudes:
         allcoordinates.append(create_data_points(x))
 
-
-    plt.plot(allcoordinates[0][0], allcoordinates[0][1], 'ko', label='160-170 km')
-    plt.plot(allcoordinates[1][0], allcoordinates[1][1], 'go', label='170-180 km')
-    plt.plot(allcoordinates[2][0], allcoordinates[2][1], 'bo', label='180-190 km')
-    plt.plot(allcoordinates[3][0], allcoordinates[3][1], 'co', label='190-200 km')
-    plt.plot(allcoordinates[4][0], allcoordinates[4][1], 'ro', label='200-210 km')
+    plt.figure(1)
+    plt.plot(allcoordinates[0][0], allcoordinates[0][1], 'ko', label='{}-{} km'.format(lower,lower+dalt))
+    plt.plot(allcoordinates[1][0], allcoordinates[1][1], 'go', label='{}-{} km'.format(lower+dalt,lower+2*dalt))
+    plt.plot(allcoordinates[2][0], allcoordinates[2][1], 'bo', label='{}-{} km'.format(lower+2*dalt,lower+3*dalt))
+    plt.plot(allcoordinates[3][0], allcoordinates[3][1], 'co', label='{}-{} km'.format(lower+3*dalt,lower+4*dalt))
+    plt.plot(allcoordinates[4][0], allcoordinates[4][1], 'ro', label='{}-{} km'.format(lower+4*dalt,lower+5*dalt))
 
 
     plt.legend(loc='best',fontsize = 9)
@@ -219,6 +238,14 @@ if(UserChoice == 2):
     plt.ylabel('Density ($Molecules/cm^3$)',fontsize=18)
     plt.gcf().autofmt_xdate()
     PearCorr = allcoordinates[0][1].corr(allcoordinates[1][1])
-    print "The Pearson Correlation Coefficient between the 160-170 km and 170-180 km lines is: {}".format(PearCorr)
+    print "The average Pearson Correlation Coefficient between the 160-170 km and 170-180 km lines is: {}".format(PearCorr)
+
+    pearCorrCoef = density_pCorrCoef(date_indexed_rollavg(altitude1), date_indexed_rollavg(altitude2))
+    plt.figure(2)
+    plt.xlabel('Time',fontsize = 18)
+    plt.ylabel('Pearson Correlation Coefficient',fontsize=18)
+    plt.title('Pearson Correlation Coefficient versus time')
+    plt.gcf().autofmt_xdate()
+    plt.plot(pearCorrCoef.index, pearCorrCoef)
     plt.show()
-pdb.set_trace()
+#pdb.set_trace()
