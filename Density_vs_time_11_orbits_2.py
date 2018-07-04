@@ -145,10 +145,11 @@ def create_data_points(mydataframe):
     mydataframe_den_copy = mydataframe['den'].copy()
     mydataframe_date_copy = mydataframe['date'].copy()
     rolling_avg_den = mydataframe_den_copy.rolling(window = 11, center = True).mean()
-    rolling_avg_date = mydataframe_date_copy.rolling(window =11, center = True).mean()
-    x_values = rolling_avg_date.dropna()
+    #rolling_avg_date = mydataframe_date_copy.rolling(window =11, center = True).mean()
+    mydataframe = mydataframe.dropna()
+    x_values = mydataframe['date']
     x_values = pd.DatetimeIndex(x_values)
-    y_values = rolling_avg_den.dropna()
+    y_values = rolling_avg_den
     mycoords.append(x_values)
     mycoords.append(y_values)
     return mycoords
@@ -207,14 +208,28 @@ if(UserChoice == 2):
     allcoordinates = []
     #list of all Altitudes
     allaltitudes = []
-
+    #specify lower alt(km) and size of alt bin
     lower = 160
     dalt = 10
     altitude1 = mydf[(mydf['alt'] >= lower) & (mydf['alt'] < lower+dalt)]
+    altitude1 = altitude1.groupby(altitude1.index).filter(lambda x: ((x['alt'] < lower+1) & (x['alt'] > lower)).any())
+    altitude1 = altitude1.groupby(altitude1.index).filter(lambda x: ((x['alt'] > lower+9) & (x['alt'] < lower +10)).any())
+
     altitude2 = mydf[(mydf['alt'] >= lower+dalt) & (mydf['alt'] < lower+2*dalt)]
+    altitude2 = altitude2.groupby(altitude2.index).filter(lambda x: ((x['alt'] < lower+11) & (x['alt'] > lower+10)).any())
+    altitude2 = altitude2.groupby(altitude2.index).filter(lambda x: ((x['alt'] > lower+19) & (x['alt'] < lower +20)).any())
+
     altitude3 = mydf[(mydf['alt'] >= lower+2*dalt) & (mydf['alt'] < lower+3*dalt)]
+    altitude3 = altitude3.groupby(altitude3.index).filter(lambda x: ((x['alt'] < lower+21) & (x['alt'] > lower+20)).any())
+    altitude3 = altitude3.groupby(altitude3.index).filter(lambda x: ((x['alt'] > lower+29) & (x['alt'] < lower +30)).any())
+
     altitude4 = mydf[(mydf['alt'] >= lower+3*dalt) & (mydf['alt'] < lower+4*dalt)]
+    altitude4 = altitude4.groupby(altitude4.index).filter(lambda x: ((x['alt'] < lower+31) & (x['alt'] > lower+30)).any())
+    altitude4 = altitude4.groupby(altitude4.index).filter(lambda x: ((x['alt'] > lower+39) & (x['alt'] < lower +40)).any())
+
     altitude5 = mydf[(mydf['alt'] >= lower+4*dalt) & (mydf['alt'] < lower+5*dalt)]
+    altitude5 = altitude5.groupby(altitude5.index).filter(lambda x: ((x['alt'] < lower+41) & (x['alt'] > lower+40)).any())
+    altitude5 = altitude5.groupby(altitude5.index).filter(lambda x: ((x['alt'] > lower+49) & (x['alt'] < lower +50)).any())
 
     allaltitudes.append(altitude1)
     allaltitudes.append(altitude2)
@@ -248,4 +263,4 @@ if(UserChoice == 2):
     plt.gcf().autofmt_xdate()
     plt.plot(pearCorrCoef.index, pearCorrCoef)
     plt.show()
-#pdb.set_trace()
+pdb.set_trace()
