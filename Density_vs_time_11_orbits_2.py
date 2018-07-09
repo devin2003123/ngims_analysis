@@ -99,8 +99,8 @@ def date_range(startdate,enddate):
             mylist.append(file)
     return mylist
 
-startdate = datetime(2016,3,25)
-enddate = datetime(2016,5,10)
+startdate = datetime(2016,1,1)
+enddate = datetime(2016,12,31)
 #dates = pd.date_range(startdate,enddate,freq='2min')
 mylist = date_range(startdate,enddate)
 all_ngims = read_ngims(mylist)
@@ -165,12 +165,12 @@ def date_indexed_rollavg(mydataframe):
     dateIndexDF.index = pd.DatetimeIndex(dateIndexDF.index)
 
     #extract the density series from the DataFrame
-    dateIndexDS = dateIndexDF['den'].resample('1d').mean()
+    dateIndexDS = dateIndexDF['den'].resample('6H').mean()
     return dateIndexDS
 
 #function to determine the correlation between two density dataseries
 def density_pCorrCoef(dataSeriesOne, dataSeriesTwo):
-    correlation = pd.rolling_corr(dataSeriesOne, dataSeriesTwo, window = 4, center = True)
+    correlation = pd.rolling_corr(dataSeriesOne, dataSeriesTwo, window = 24, center = True)
     return correlation.dropna()
 
 ##Logic Branch for Single Altitude
@@ -196,8 +196,8 @@ if(UserChoice == 1):
     #make dates look nicer
     plt.gcf().autofmt_xdate()
     #misc plot data
-    plt.xlabel('Time',fontsize=14)
-    plt.ylabel('Density ($Molecules/cm^3$)')
+    plt.xlabel('Time',fontsize=18)
+    plt.ylabel('Density ($Molecules/cm^3$)',fontsize=18)
     #plt.title('%i km'%(UserAlt))
     #show plot
     plt.show()
