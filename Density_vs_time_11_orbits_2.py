@@ -157,20 +157,27 @@ def create_data_points(mydataframe):
 #function to determine a dataframe's rolling average and then reindex it by date
 def date_indexed_rollavg(mydataframe):
     dateIndexDF = mydataframe.copy()
+    dateIndexDF['date'] = pd.DatetimeIndex(dateIndexDF['date'])
+    dateIndexDF['date'] = dateIndexDF['date'].dt.round('min')
     dateIndexDF['date'] = np.int64(dateIndexDF['date'])
     dateIndexDF = dateIndexDF.groupby(dateIndexDF.index).mean()
     dateIndexDF = dateIndexDF.rolling(window=11, center = True).mean()
     dateIndexDF = dateIndexDF.dropna()
+    dateIndexDF['date'] = pd.DatetimeIndex(dateIndexDF['date'])
+    dateIndexDF['date'] = dateIndexDF['date'].dt.round('min')
     dateIndexDF = dateIndexDF.set_index('date')
-    dateIndexDF.index = pd.DatetimeIndex(dateIndexDF.index)
+    #dateIndexDF.index = pd.DatetimeIndex(dateIndexDF.index)
+    oidx = dateIndexDF.index
+    nidx = pd.date_range(oidx.min(),oidx.max(),freq='270T')
+    dateIndexDF = dateIndexDF.reindex(nidx,method='nearest',limit=1,tolerance='260Min').interpolate(limit=1)
 
     #extract the density series from the DataFrame
-    dateIndexDS = dateIndexDF['den'].resample('6H').mean()
+    dateIndexDS = dateIndexDF['den']
     return dateIndexDS
 
 #function to determine the correlation between two density dataseries
 def density_pCorrCoef(dataSeriesOne, dataSeriesTwo):
-    correlation = pd.rolling_corr(dataSeriesOne, dataSeriesTwo, window = 24, center = True)
+    correlation = pd.rolling_corr(dataSeriesOne, dataSeriesTwo, window = 16, min_periods=10, center = True)
     return correlation.dropna()
 
 ##Logic Branch for Single Altitude
@@ -255,12 +262,21 @@ if(UserChoice == 2):
     PearCorr = allcoordinates[0][1].corr(allcoordinates[1][1])
     print "The average Pearson Correlation Coefficient between the 160-170 km and 170-180 km lines is: {}".format(PearCorr)
 
-    pearCorrCoef = density_pCorrCoef(date_indexed_rollavg(altitude1), date_indexed_rollavg(altitude2))
+    pearCorrCoef = density_pCorrCoef(date_indexed_rollavg(altitude2), date_indexed_rollavg(altitude3))
     plt.figure(2)
     plt.xlabel('Time',fontsize = 18)
     plt.ylabel('Pearson Correlation Coefficient',fontsize=18)
     plt.title('Pearson Correlation Coefficient versus time')
     plt.gcf().autofmt_xdate()
-    plt.plot(pearCorrCoef.index, pearCorrCoef)
+    plt.plot(pearCorrCoef.index, pearCorrCoef,'b-')
     plt.show()
 pdb.set_trace()
+
+
+####How to recreate minutes between data point plot
+#Emsure bin nhas been grouped by orbit number
+#Convert dates from np.int64 to DatetimeIndex and round to nearest minute using df['date'].dt.round('min')
+#Create new column in an altitude bin (e.g. altitude2) which represents the difference between successive rows in said DataFrame
+#this is done with SampleAlttudeBin['difference']=SampleAlttudeBin['date'].sub[SampleAlttudeBin['date'].shift()).fillna(0)
+#Recast SampleAlttudeBin['difference'].astype('timedelta64[m]')
+#Plot!
